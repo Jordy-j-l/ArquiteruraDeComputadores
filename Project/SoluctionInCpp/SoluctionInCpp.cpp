@@ -35,29 +35,28 @@ int main() {
         two[i] = i + 2;
     }*/
 
-    
+
 
     _asm {
     SumTotal:
 
-    mov eax, 0
-    mov ecx, 0
-    for1:
-        add ecx, 1
-        mov one[eax], cl
-        inc eax
-        mov ecx, eax
-        cmp eax, size1
-        jb for1 
-    mov eax, 0
-    mov ecx, 0
-    for2:
-        add ecx, 2
-        mov two[eax], cl
-        inc eax
-        mov ecx, eax
-        cmp eax, size2
-        jb for2
+                mov eax, 0
+                mov ecx, 0
+            for1 :
+                inc ecx
+                mov one[eax], cl
+                inc eax
+                cmp eax, size1
+                jb for1
+                mov eax, 0
+                mov ecx, 0
+            for2:
+                add ecx, 2
+                mov two[eax], cl
+                inc eax
+                mov ecx, eax
+                cmp eax, size2
+                jb for2
     }
     for (char i = 0; i < size1; i++) {
         printf("One=%d\n", one[i]);
@@ -67,4 +66,6 @@ int main() {
     }
     printf("A media dos dois arrays e: %d\n", SumTotal(one, two));
 }
+
+//Comentario
 
