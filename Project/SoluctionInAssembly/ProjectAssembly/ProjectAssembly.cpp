@@ -1,3 +1,6 @@
+#define size1 16
+#define size2 16
+
 int main() {
 
     if (size1 > size2) {
