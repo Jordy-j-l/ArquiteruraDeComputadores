@@ -20,6 +20,7 @@
             }
             for (char i = 0;i < size2;i++) {
                 sumTotal += three[i];
+                printf("%d >>SumTotal\n", sumTotal);
             }
         }
 
@@ -29,38 +30,31 @@
     int main() {
 
         if (size1 > size2) {
-            char three[size1];
             char one[size1];
             char two[size1];
                 for(char i = 0; i < size1; i++) {
                     one[i] = i + 1;
+                    printf("%d >>\n", one[i]);
                 }
                 for (char i = 0; i < size1; i++) {
-
-                    if (i <= size2) {
-                        two[i] = i + 2;
-                    }
-                    else {
-                        two[i] = 0;
-                    }
-
+                   
+                    two[i] = i < size2 ? i + 2 : 0;
+                    printf("%d >>\n", two[i]);
                 }
          printf("A media dos dois arrays e: %d\n", SumTotal(one, two));
         }
         else {
             char one[size2];
             char two[size2];
-            char three[size2];
+            
                 for (char i = 0; i < size2; i++) {
-                    if (i <= size1) {
-                        one[i] = i + 1;
-                    }
-                    else {
-                        one[i] = 0;
-                    }
+                    one[i] = i < size1 ? i + 1 : 0;
+                    printf("%d >>\n", one[i]);
+                    
                 }
-                for (char i = 0; i < size1; i++) {
+                for (char i = 0; i < size2; i++) {
                     two[i] = i + 2;
+                    printf("%d >>\n", two[i]);
                 }
             printf("A media dos dois arrays e: %d\n", SumTotal(one, two));
         }
