@@ -6,7 +6,7 @@
         int maxSize = size1 + size2 == 0 ? 2 : size1 + size2;// Se ambos os tamanhos forem 0, usa 2 como valor mínimo porque cada array tera 1 elemento
         int sumTotal = 0;
         if (size1 > size2) {
-            char three[size1];
+            int three[size1];
             for (char i = 0;i < size1;i++) {
                 three[i] = arrayOne[i] + arrayTwo[i];
             }
@@ -14,7 +14,7 @@
                 sumTotal += three[i];
             }
         }else {
-            char three[size2];
+            int three[size2];
             for (char i = 0;i < size2;i++) {
                 three[i] = arrayOne[i] + arrayTwo[i];
             }
@@ -33,7 +33,7 @@
             char one[size1];
             char two[size1];
                 for(char i = 0; i < size1; i++) {
-                    one[i] = i + 1;
+                    one[i] = -i;
                     printf("%d >>\n", one[i]);
                 }
                 for (char i = 0; i < size1; i++) {
@@ -48,7 +48,7 @@
             char two[size2];
             
                 for (char i = 0; i < size2; i++) {
-                    one[i] = i < size1 ? i + 1 : 0;
+                    one[i] = i < size1 ? -i  : 0;
                     printf("%d >>\n", one[i]);
                     
                 }
