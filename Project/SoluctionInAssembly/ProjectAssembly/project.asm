@@ -51,15 +51,16 @@ LoopPrincipal:
     paddb xmm0, xmm1
     
     ; Soma todos os elementos do resultado
-    pxor xmm2, xmm2
-    psadbw xmm0, xmm2
+    pxor xmm2, xmm2         ; zera xmm2
+    psadbw xmm0, xmm2       ; faz a diferença absoluta de xmm0 com xmm2 (neste caso e zero) e depois soma tudo
+                            ; a soma dos primeiros 8 bytes fica no low 64 bits e a soma dos ultimos 8 bytes fica no high 64 bits
     
     ; Combina as metades da soma
-    movhlps xmm1, xmm0
-    paddd xmm0, xmm1
+    movhlps xmm1, xmm0      ; copia os high 64 bits de xmm0 para os low 64 bits de xmm1
+    paddd xmm0, xmm1        ; soma valores de 32 bits dentro dos registos xmm0 e xmm1
     
     ; Pega o resultado final
-    movd edx, xmm0
+    movd edx, xmm0          ; move apenas os primeiros 32 bits de um registo xmm para um registo normal
     add eax, edx            ; Acumula no total
     
     ; Avanca os ponteiros
