@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <cstdlib> 
 
-#define size1 8
-#define size2 3
+#define size1 45
+#define size2 45
 #define MAIOR (size1 > size2 ? size1 : size2)
 
 
