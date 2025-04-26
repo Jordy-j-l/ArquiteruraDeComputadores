@@ -1,9 +1,9 @@
 #include <iostream>
-#include <cstdio>
-#include <cstdlib> 
-
-#define size1 45
-#define size2 45
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define size1 537
+#define size2 5000
 #define MAIOR (size1 > size2 ? size1 : size2)
 
 
@@ -21,13 +21,13 @@ int main() {
     // Aloca memória alinhada
     char one[MAIOR];
     char two[MAIOR];
-
+    srand(time(NULL));
     int maxSize = size1 + size2;
 
     // Preenche os arrays
     for (int i = 0; i < MAIOR; i++) {
-        one[i] = i < size1 ? i + 1 : 0;
-        two[i] = i < size2 ? i + 2 : 0;
+        one[i] = i < size1 ? rand() % 100 : 0;
+        two[i] = i < size2 ? rand() % 100 : 0;
         printf("one[%d] = %d, two[%d] = %d\n", i, one[i], i, two[i]);
     }
 
