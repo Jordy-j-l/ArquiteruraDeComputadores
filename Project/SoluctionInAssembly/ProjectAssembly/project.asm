@@ -1,17 +1,20 @@
-; Media de Arrays 
-section .text; Seção de código do programa
-global SumTotalASM; Define o ponto de entrada global da função para ser acessível externamente
+.MODEL FLAT, C          ; Usa o modelo de memória flat e convenções de chamada C
 
-; Função: _SumTotal_ASM
+.DATA                   ; Início da seção de dados
+; Variáveis podem ser definidas aqui se necessário
+
+.CODE                   ; Início da seção de código
+
+; Função: SumTotalASM
 ; Parâmetros (passados na pilha):
 ;   [ebp+8]  - arrayOne
 ;   [ebp+12] - arrayTwo
-;   [ebp+16] - maxsize
-;   [ebp+20] - tamanho dos arrays
+;   [ebp+16] - valorMaximo
+;   [ebp+20] - tamanhoDosArrays
 ; Retorna:
 ;   eax - média dos arrays
 ;________________________________________________________________________________
-SumTotalASM:; Função: SumTotalASM
+SumTotalASM PROC
     push ebp
     mov ebp, esp
     ; Salva registos que serão usados
@@ -33,18 +36,19 @@ SumTotalASM:; Função: SumTotalASM
     shr edx, 4          ; Divide por 16 (calcula quantos blocos de 16 completos)
     and ecx, 0xF        ; Calcula resto da divisão por 16 (elementos restantes)
     mov ebx, edx  
-    .LoopPrincipal:
+    LoopPrincipal:
         movdqu xmm0, [esi]    ; Carrega 16 bytes do arrayOne em xmm0
         movdqu xmm1, [edi]    ; Carrega 16 bytes do arrayTwo em xmm1
         
         ; Soma os bytes
         pxor xmm2, xmm2
-        paddb xmm2, xmm0, xmm1
-        
+        paddb xmm2, xmm0
+        paddb xmm2, xmm1
+        ;Podiamos fazer  paddb xmm1, xmm0
         ; Soma todos os elementos que são resultado da soma anterior
         pxor xmm3, xmm3
         psadbw xmm4, xmm2, xmm3;equivalente a fazer uma soma de todos os elemntos de um array
-        
+        ;No outro caso aqui ficava psadbw xmm4, xmm1
         ; Extrai resultado
         movd edx, xmm4 ; Copia os primeiros 32 bits de xmm4 para edx
         add eax, edx ;Equivalente a fazer SomTotal+=Result[i]
@@ -54,17 +58,17 @@ SumTotalASM:; Função: SumTotalASM
         add edi, 16; Avança 16 bytes no arrayTwo
         dec ebx ; Decrementa contador de blocos
         cmp ebx, 0
-        jne .LoopPrincipal; Repete se ainda houver blocos
+        jne LoopPrincipal; Repete se ainda houver blocos
      ; Processa elementos restantes (menos de 16)
-    .elementosRestantes:
+    elementosRestantes:
         cmp ecx, 0; Verifica se há elementos restantes
-        je .done;Se não houver terminar
+        je done;Se não houver terminar
         
                 ; Processa elementos um a um
         xor ebx, ebx         ; Zera ebx (usará para carregar bytes)
         xor edx, edx         ; Zera edx (usará para carregar bytes)
         
-        .loopElementoPorElemnto:
+        loopElementoPorElemnto:
             movzx ebx, byte [esi] ; Carrega byte do arrayOne com extensão para 32 bits
             movzx edx, byte [edi] ; Carrega byte do arrayTwo com extensão para 32 bits
             add ebx, edx          ; Soma os dois bytes
@@ -75,10 +79,10 @@ SumTotalASM:; Função: SumTotalASM
             inc edi              ; Incrementa ponteiro do arrayTwo
             dec ecx              ; Decrementa contador
             cmp ecx,0
-            jne .loopElementoPorElemnto ; Repete até ecx = 0
+            jne loopElementoPorElemnto ; Repete até ecx = 0
     
     ; Finalização - calcula média e retorna
-    .done:
+    done:
         cdq               ; Estende sinal de eax para edx:eax (prepara para divisão)
         idiv dword [ebp+16] ; Divide eax por maxsize (resultado em eax)
         
@@ -89,3 +93,8 @@ SumTotalASM:; Função: SumTotalASM
         mov esp, ebp     ; Restaura stack pointer
         pop ebp          ; Restaura base pointer
         ret              ; Retorna da função (resultado em eax)
+SumTotalASM ENDP
+
+END ; Fim do arquivo assembly
+
+

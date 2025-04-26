@@ -15,6 +15,15 @@
         }
         return sumTotal / maxsize;
     }
+
+    int SumTotalC(char arrayOne[], char arrayTwo[], int maxsize, int arraySize) {
+        int sumTotal = 0;
+        for (int i = 0; i < arraySize; i++) {
+            sumTotal += arrayOne[i] + arrayTwo[i];
+        }
+        return sumTotal / maxsize;
+    }//Resolução pensada depois de programar em assembly
+
     int main(){
         int maxSize = size1 + size2 == 0 ? 2 : size1 + size2;// Se ambos os tamanhos forem 0, usa 2 como valor mínimo porque cada array tera 1 elemento
         char one[MAIOR];
@@ -31,6 +40,7 @@
             printf("%d >>\n", two[i]);
         }
         printf("A media dos dois arrays e: %d\n", SumTotal(one, two,maxSize));
+        printf("A media dos dois arrays e: %d\n", SumTotalC(one, two, maxSize, MAIOR));
     
     
     
