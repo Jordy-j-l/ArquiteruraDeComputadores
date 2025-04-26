@@ -1,12 +1,11 @@
 #include <iostream>
 #include <cstdio>
-#define size1 8
-#define size2 6
+#include <cstdlib> 
+#define size1 16
+#define size2 16
 #define MAIOR (size1 > size2 ? size1 : size2)
 
-
-extern int SumTotalASM(char* arrayOne, char* arrayTwo, int maxsize, int arraySize);
-
+extern "C" int SumTotalASM(char* arrayOne, char* arrayTwo, int maxsize, int arraySize);
 // Função em C para comparação
 int SumTotalC(char arrayOne[], char arrayTwo[], int maxsize, int arraySize) {
     int sumTotal = 0;
@@ -16,28 +15,23 @@ int SumTotalC(char arrayOne[], char arrayTwo[], int maxsize, int arraySize) {
     return sumTotal / maxsize;
 }
 
+int main(){
+    // Aloca memória alinhada para SSE
+    char* one = (char*)_aligned_malloc(MAIOR, ALIGNMENT);
+    char* two = (char*)_aligned_malloc(MAIOR, ALIGNMENT);
+    int maxSize = (size1 + size2) ? (size1 + size2) : 2;
 
-
-
-int main() {
-    int maxSize = size1 + size2 == 0 ? 2 : size1 + size2;// Se ambos os tamanhos forem 0, usa 2 como valor mínimo porque cada array tera 1 elemento
-    char one[MAIOR];
-    char two[MAIOR];
-
-    for (int i = 0; i < MAIOR; i++) {
-
+    // Preenche os arrays
+    for (int i = 0; i < MAIOR; i++){
         one[i] = i < size1 ? i + 1 : 0;
-        printf("%d >>\n", one[i]);
-    }
-    for (int i = 0; i < MAIOR; i++) {
-
         two[i] = i < size2 ? i + 2 : 0;
-        printf("%d >>\n", two[i]);
+
+        printf("one[%d] = %d, two[%d] = %d\n", i, one[i], i, two[i]);
     }
-    printf("Resultado em C: %d\n", SumTotalC(arrayOne, arrayTwo, maxsize, ARRAY_SIZE));
-    printf("Resultado em Assembly: %d\n", SumTotalASM(arrayOne, arrayTwo, maxsize, ARRAY_SIZE));
-
-
-
-
+    printf("Resultado em C: %d\n", SumTotalC(one, two, maxSize, MAIOR));
+    printf("Resultado em Assembly: %d\n", SumTotalASM(one, two, maxSize, MAIOR));
+    // Libera memória alinhada
+    _aligned_free(one);
+    _aligned_free(two);
+    return 0;
 }
