@@ -2,10 +2,10 @@
 #include <cstdio>
 #include <cstdlib> 
 
-#define size1 17
-#define size2 19
+#define size1 8
+#define size2 3
 #define MAIOR (size1 > size2 ? size1 : size2)
-#define ALIGNMENT 16
+
 
 extern "C" int SumTotalASM(char* arrayOne, char* arrayTwo, int maxsize, int arraySize);
 
@@ -19,8 +19,9 @@ int SumTotalC(char arrayOne[], char arrayTwo[], int maxsize, int arraySize) {
 
 int main() {
     // Aloca memória alinhada
-    char* one = (char*)_aligned_malloc(MAIOR, ALIGNMENT);
-    char* two = (char*)_aligned_malloc(MAIOR, ALIGNMENT);
+    char one[MAIOR];
+    char two[MAIOR];
+
     int maxSize = size1 + size2;
 
     // Preenche os arrays
@@ -32,9 +33,6 @@ int main() {
 
     printf("Resultado em C: %d\n", SumTotalC(one, two, maxSize, MAIOR));
     printf("Resultado em Assembly: %d\n", SumTotalASM(one, two, maxSize, MAIOR));
-
-    _aligned_free(one);
-    _aligned_free(two);
 
     system("pause");
     return 0;

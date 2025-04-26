@@ -1,113 +1,109 @@
-; Define o modelo de memória (flat) e convenções de chamada C
 .MODEL FLAT, C
-
-; Seção de dados - para declaração de variáveis globais
 .DATA
-    ; Variáveis podem ser definidas aqui se necessário
+    ; Variaveis podem ser definidas aqui
 
-; Seção de código - contém as instruções do programa
 .CODE
 
-; ------------------------------------------------------------------------------
-; Função: SumTotalASM
-; Descrição: Calcula a média da soma de dois char arrays 
-; Parâmetros (passados pela pilha):
-;   [ebp+8]  - ponteiro para o primeiro array (arrayOne)
-;   [ebp+12] - ponteiro para o segundo array (arrayTwo)
-;   [ebp+16] - valor máximo para cálculo da média (valorMaximo)
-;   [ebp+20] - tamanho dos arrays (tamanhoDosArrays)
-; Retorna:
-;   eax - média dos arrays (soma total / valorMaximo)
-; ------------------------------------------------------------------------------
+;___________________________________________________________________
+; Funcao: SumTotalASM
+; Calcula a media da soma de dois arrays de bytes
+; parametros:
+;   [ebp+8]  _ arrayOne (ponteiro)
+;   [ebp+12] _ arrayTwo (ponteiro)
+;   [ebp+16] _ valorMaximo (int)
+;   [ebp+20] _ tamanhoDosArrays (int)
+; Retorna: eax = média (soma total / valorMaximo)
+;___________________________________________________________________
 SumTotalASM PROC
-   
-    push ebp           
-    mov ebp, esp        
+
+    push ebp
+    mov ebp, esp
     
-    ; Salva registos que serão utilizados
+    ; Salva registos
     push ebx
     push esi
     push edi
-    ; Inicialização de registos
-    xor eax, eax            ; Zera eax (sumTotal = 0)
-    mov esi, [ebp+8]        ; Carrega endereço do arrayOne em esi
-    mov edi, [ebp+12]       ; Carrega endereço do arrayTwo em edi
-    mov ecx, [ebp+20]       ; Carrega tamanho dos arrays em ecx
     
-    ; Verifica se há elementos suficientes (SIMD)
-    cmp ecx, 16             ; Compara tamanho com 16
-    jl elementosRestantes   ; Se menor que 16, processa elemento por elemento
+    ; Inicia  os registos
+    xor eax, eax            ; sumTotal = 0
+    mov esi, [ebp+8]        ; arrayOne
+    mov edi, [ebp+12]       ; arrayTwo
+    mov ecx, [ebp+20]       ; tamanhoDosArrays
     
-    ; Configuração para processamento vetorial (16 elementos por iteração)
-    mov edx, ecx            ; Copia tamanho para edx
-    shr edx, 4              ; Divide por 16 (número de blocos completos)
-    and ecx, 0Fh            ; Calcula resto (elementos restantes após blocos de 16)
+    ; Verifica se tem elementos suficientes para processar em blocos
+    cmp ecx, 16
+    jl elementosRestantes
     
-    xor ebx, ebx            ; Zera contador de blocos (ebx = 0)
+    ; Configura processamento em blocos de 16
+    mov edx, ecx
+    shr edx, 4              ; edx = numero de blocos
+    mov ebx, edx            ; ebx = contador de blocos
+    and ecx, 0Fh            ; ecx = elementos restantes
+    cmp edx, 0
+    je elementosRestantes
 
-; Loop principal - processa blocos de 16 bytes usando instruções SIMD
 LoopPrincipal:
-    ; Carrega 16 bytes de cada array em registos XMM
-    movdqu xmm0, [esi]      ; Carrega 16 bytes do arrayOne (não alinhado)
-    movdqu xmm1, [edi]      ; Carrega 16 bytes do arrayTwo (não alinhado)
+    ; Carrega 16 bytes de cada array
+    movdqu xmm0, [esi]      ; arrayOne
+    movdqu xmm1, [edi]      ; arrayTwo
     
-    ; Soma os bytes dos dois arrays
-    paddb xmm0, xmm1        ; Soma os bytes (xmm0 = xmm0 + xmm1)
+    ; Soma os bytes
+    paddb xmm0, xmm1
     
-    ; Soma horizontal dos bytes no registos XMM
-    pxor xmm2, xmm2         ; Zera xmm2 (para comparação)
-    psadbw xmm0, xmm2       ; Soma absoluta das diferenças (resultado em xmm0[63:0])
+    ; Soma todos os elementos do resultado
+    pxor xmm2, xmm2
+    psadbw xmm0, xmm2
     
-    ; Extrai resultado para registos de propósito geral
-    movd edx, xmm0          ; Move os 32 bits inferiores para edx
-    add eax, edx            ; Acumula no total (eax += edx)
+    ; Combina as metades da soma
+    movhlps xmm1, xmm0
+    paddd xmm0, xmm1
     
-    ; Avança ponteiros para os próximos 16 elementos
-    add esi, 16             ; Avança arrayOne em 16 bytes
-    add edi, 16             ; Avança arrayTwo em 16 bytes
+    ; Pega o resultado final
+    movd edx, xmm0
+    add eax, edx            ; Acumula no total
     
-    inc ebx                 ; Incrementa contador de blocos
-    cmp ebx, edx            ; Compara com número total de blocos
-    jl LoopPrincipal        ; Repete se ainda houver blocos
+    ; Avanca os ponteiros
+    add esi, 16
+    add edi, 16
+    
+    ; Controla o loop
+    dec ebx
+    jnz LoopPrincipal
 
-; Processa elementos restantes (menos de 16) de forma escalar
 elementosRestantes:
-    test ecx, ecx           ; Verifica se há elementos restantes
-    jz done                 ; Se não, vai para o final
+    ; Processa elementos que sobraram (<16)
+    cmp ecx, 0
+    je done
     
-    ; Processamento elemento por elemento (modo escalar)
-    xor ebx, ebx            ; Zera ebx (usará para carregar bytes)
-    xor edx, edx            ; Zera edx (usará para carregar bytes)
-    
-loopElementoPorElemento:
-    ; Carrega e soma elementos individuais
-    movzx ebx, byte ptr [esi]  ; Carrega byte do arrayOne com extensão para 32 bits
-    movzx edx, byte ptr [edi]  ; Carrega byte do arrayTwo com extensão para 32 bits
-    add ebx, edx               ; Soma os dois bytes
-    add eax, ebx               ; Acumula no total
-    
-    ; Avança para o próximo elemento
-    inc esi                   ; Incrementa ponteiro do arrayOne
-    inc edi                   ; Incrementa ponteiro do arrayTwo
-    dec ecx                   ; Decrementa contador de elementos
-    jnz loopElementoPorElemento ; Repete até ecx = 0
+    xor ebx, ebx
+    xor edx, edx
 
-; Finalização - calcula a média e prepara retorno
+loopElementoPorElemento:
+    ; Soma elemento por elemento
+    movzx ebx, byte ptr [esi]  ; Pega byte do arrayOne
+    movzx edx, byte ptr [edi]  ; Pega byte do arrayTwo
+    add ebx, edx               ; Soma os dois
+    add eax, ebx               ; Acumula
+    
+    ; Proximo elemento
+    inc esi
+    inc edi
+    dec ecx
+    jnz loopElementoPorElemento
+
 done:
-    ; Converte eax para edx:eax (prepara para divisão)
+    ; Calcula a media final
     cdq
+    idiv dword ptr [ebp+16]  ; Divide pelo valor maximo
     
-    ; Divide soma total pelo valor máximo
-    idiv dword ptr [ebp+16]  ; eax = eax / valorMaximo (resultado da média)
-    
-    ; restaura registos e pilha
-    pop edi                  ; Restaura edi
-    pop esi                  ; Restaura esi
-    pop ebx                  ; Restaura ebx
-    mov esp, ebp             ; Restaura stack pointer
-    pop ebp                  ; Restaura base pointer
-    ret                      ; Retorna da função (resultado em eax)
+    ; Restaura Registos ao seu estado Inicial
+    pop edi
+    pop esi
+    pop ebx
+    mov esp, ebp
+    pop ebp
+    ret
 SumTotalASM ENDP
 
-; Fim do arquivo assembly - indica que não há mais código a ser processado
+; Fim do arquivo
 END
