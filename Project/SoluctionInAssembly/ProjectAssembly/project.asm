@@ -48,7 +48,7 @@ LoopPrincipal:
     movdqu xmm1, [edi]      ; arrayTwo
     
     ; Soma os bytes
-    paddb xmm0, xmm1
+    paddb xmm0, xmm1        ; soma os bytes de xmm0 com os bytes de xmm1
     
     ; Soma todos os elementos do resultado
     pxor xmm2, xmm2         ; zera xmm2
