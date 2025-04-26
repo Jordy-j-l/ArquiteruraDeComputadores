@@ -29,7 +29,7 @@ int main() {
     for (int i = 0; i < MAIOR; i++) {
         one[i] = i < size1 ? rand() % 100 : 0;
         two[i] = i < size2 ? rand() % 100 : 0;
-        //printf("one[%d] = %d, two[%d] = %d\n", i, one[i], i, two[i]);
+        //printf("one[%d] = %d, two[%d] = %d\n", i, one[i], i, two[i]); //está comentado para não atrasar o tempo de execução em C a imprimir os 2 arrays ao user
     }
 
     // Medir o tempo da função em C
