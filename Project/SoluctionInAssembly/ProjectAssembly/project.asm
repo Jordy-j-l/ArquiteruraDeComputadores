@@ -76,8 +76,8 @@ elementosRestantes:
     cmp ecx, 0              ;verifica se ainda existem valores para somar que não caibam num bloco de 16 bytes
     je done                 ;se já não existirem avança para o label done para calcular a média
     
-    xor ebx, ebx
-    xor edx, edx
+    xor ebx, ebx            ; Zera o registo ebx
+    xor edx, edx            ; Zera o registo edx
 
 loopElementoPorElemento:
     ; Soma elemento por elemento
@@ -87,9 +87,9 @@ loopElementoPorElemento:
     add eax, ebx               ; Acumula
     
     ; Proximo elemento
-    inc esi
-    inc edi
-    dec ecx
+    inc esi                    ; Incrementa para iterar o proximo elemento
+    inc edi                    ; Incrementa para iterar o proximo elemento
+    dec ecx                    ; Decrementa mais um valor dos elementos restantes
     jnz loopElementoPorElemento
 
 done:
@@ -98,12 +98,12 @@ done:
     idiv dword ptr [ebp+16]    ; Divide pelo valor maximo
     
     ; Restaura Registos ao seu estado Inicial
-    pop edi
-    pop esi
-    pop ebx
-    mov esp, ebp
-    pop ebp
-    ret
+    pop edi                    ; Efetua um pop para deixar a stack como ela estava anteriormente
+    pop esi                    ; Efetua um pop para deixar a stack como ela estava anteriormente
+    pop ebx                    ; Efetua um pop para deixar a stack como ela estava anteriormente
+    mov esp, ebp               ; Restaura o stack pointer (esp) para o valor salvo no início da função (ebp)
+    pop ebp                    ; Efetua um pop para deixar a stack como ela estava anteriormente
+    ret                        ; Sai da função
 SumTotalASM ENDP
 
 ; Fim do arquivo
