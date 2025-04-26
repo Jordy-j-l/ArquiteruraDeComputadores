@@ -6,7 +6,7 @@
 
 ;___________________________________________________________________
 ; Funcao: SumTotalASM
-; Calcula a media da soma de dois arrays de bytes
+; Calcula a media da soma de dois arrays de chars
 ; parametros:
 ;   [ebp+8]  _ arrayOne (ponteiro)
 ;   [ebp+12] _ arrayTwo (ponteiro)
@@ -64,17 +64,17 @@ LoopPrincipal:
     add eax, edx            ; Acumula no total
     
     ; Avanca os ponteiros
-    add esi, 16
-    add edi, 16
+    add esi, 16             ;avança 16 posições no array
+    add edi, 16             ;avança 16 posições no array
     
     ; Controla o loop
-    dec ebx
+    dec ebx                 ;quando chegar a 0 é porque já não existem blocos de 16 bytes completos para serem somados
     jnz LoopPrincipal
 
 elementosRestantes:
     ; Processa elementos que sobraram (<16)
-    cmp ecx, 0
-    je done
+    cmp ecx, 0              ;verifica se ainda existem valores para somar que não caibam num bloco de 16 bytes
+    je done                 ;se já não existirem avança para o label done para calcular a média
     
     xor ebx, ebx
     xor edx, edx
@@ -94,8 +94,8 @@ loopElementoPorElemento:
 
 done:
     ; Calcula a media final
-    cdq
-    idiv dword ptr [ebp+16]  ; Divide pelo valor maximo
+    cdq                        ; Expande o valor do registo eax de 32 bits para 64 bits, guardando o sinal em edx (idiv necessita de valores de 64 bits)
+    idiv dword ptr [ebp+16]    ; Divide pelo valor maximo
     
     ; Restaura Registos ao seu estado Inicial
     pop edi
