@@ -128,7 +128,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <MASM Include="project.asm" />
+    <MASM Include="project.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Testador.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
