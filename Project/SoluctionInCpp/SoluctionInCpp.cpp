@@ -1,7 +1,7 @@
     #include <iostream>
     #include <cstdio>
-    #define size1 8
-    #define size2 6
+    #define size1 159
+    #define size2 14
     #define MAIOR (size1 > size2 ? size1 : size2)
    
     int SumTotal(char arrayOne[], char arrayTwo[], int maxsize) {
@@ -25,7 +25,7 @@
     }//Resolução pensada depois de programar em assembly
 
     int main(){
-        int maxSize = size1 + size2 == 0 ? 2 : size1 + size2;// Se ambos os tamanhos forem 0, usa 2 como valor mínimo porque cada array tera 1 elemento
+        int maxSize = size1 + size2 + 2;
         char one[MAIOR];
         char two[MAIOR];
 

@@ -22,7 +22,7 @@ int main() {
     char one[MAIOR];
     char two[MAIOR];
     srand(time(NULL));
-    int maxSize = size1 + size2;
+    int maxSize = size1 + size2 + 2;
 
     // Preenche os arrays
     for (int i = 0; i < MAIOR; i++) {
