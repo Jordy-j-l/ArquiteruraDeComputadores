@@ -20,7 +20,7 @@ int SumTotalC(char arrayOne[], char arrayTwo[], int maxsize, int arraySize) {
 
 
 int main() {
-    int maxSize = size1 + size2 == 0 ? 2 : size1 + size2;// Se ambos os tamanhos forem 0, usa 2 como valor mínimo porque cada array tera 1 elemento
+    int maxSize = size1 + size2 + 2;
     char one[MAIOR];
     char two[MAIOR];
 
