@@ -6,9 +6,9 @@
 
 #define size 537
 
-extern "C" void average_arrays(unsigned char* one, unsigned char* two, unsigned char* result, int size);
+extern "C" void average_arrays(unsigned char* one, unsigned char* two, unsigned char* result, int arraySize);
 
-void averageC(unsigned char* one, unsigned char* two, unsigned char* resultC, int size) {
+void averageC(unsigned char* one, unsigned char* two, unsigned char* resultC, int arraySize) {
     for (int i = 0; i < size; i++) {
         resultC[i] = (one[i] + two[i] + 1) / 2;  // Média com arredondamento
     }
@@ -42,8 +42,8 @@ int main() {
     std::chrono::duration<double, std::micro> duracaoC = endC - startC;
 
     // Mostrar os resultados de alguns elementos para verificação
-    printf("Resultados (primeiros 10 elementos):\n");
-    for (int i = 0; i < 10; i++) {
+    printf("Resultados:\n");
+    for (int i = 0; i < size; i++) {
         printf("C[%d] = %d\tASM[%d] = %d\n", i, resultC[i], i, resultASM[i]);
     }
 

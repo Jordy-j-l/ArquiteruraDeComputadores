@@ -14,7 +14,7 @@
 ;   [ebp+20] _ tamanhoDosArrays (int)
 ; Retorna: eax = média (soma total / valorMaximo)
 ;___________________________________________________________________
-SumTotalASM PROC
+average_arrays PROC
 
    ; Função: void average_arrays(unsigned char* one, unsigned char* two, unsigned char* result, int size)
     push ebp                  ; Salva o ponteiro base (EBP)
@@ -74,7 +74,7 @@ SumTotalASM PROC
     pop ebp                   ; Restaura o ponteiro base (EBP)
     ret                       ; Retorna da função
 
-SumTotalASM ENDP
+average_arrays ENDP
 
 ; Fim do arquivo
 END
