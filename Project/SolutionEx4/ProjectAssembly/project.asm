@@ -16,94 +16,64 @@
 ;___________________________________________________________________
 SumTotalASM PROC
 
-    push ebp
-    mov ebp, esp
-    
-    ; Salva registos
-    push ebx
-    push esi
-    push edi
-    
-    ; Inicia  os registos
-    xor eax, eax            ; sumTotal = 0
-    mov esi, [ebp+8]        ; arrayOne
-    mov edi, [ebp+12]       ; arrayTwo
-    mov ecx, [ebp+20]       ; tamanhoDosArrays
-    
-    ; Verifica se tem elementos suficientes para processar em blocos
-    cmp ecx, 16
-    jl elementosRestantes
-    
-    ; Configura processamento em blocos de 16
-    mov edx, ecx
-    shr edx, 4              ; edx = numero de blocos
-    mov ebx, edx            ; ebx = contador de blocos
-    and ecx, 0Fh            ; ecx = elementos restantes
-    cmp edx, 0
-    je elementosRestantes
+   ; Função: void average_arrays(unsigned char* one, unsigned char* two, unsigned char* result, int size)
+    push ebp                  ; Salva o ponteiro base (EBP)
+    mov ebp, esp              ; Configura o quadro da pilha
 
-LoopPrincipal:
-    ; Carrega 16 bytes de cada array
-    movdqu xmm0, [esi]      ; arrayOne
-    movdqu xmm1, [edi]      ; arrayTwo
-    
-    ; Soma os bytes
-    paddb xmm0, xmm1        ; soma os bytes de xmm0 com os bytes de xmm1
-    
-    ; Soma todos os elementos do resultado
-    pxor xmm2, xmm2         ; zera xmm2
-    psadbw xmm0, xmm2       ; faz a diferença absoluta de xmm0 com xmm2 (neste caso e zero) e depois soma tudo
-                            ; a soma dos primeiros 8 bytes fica no low 64 bits e a soma dos ultimos 8 bytes fica no high 64 bits
-    
-    ; Combina as metades da soma
-    movhlps xmm1, xmm0      ; copia os high 64 bits de xmm0 para os low 64 bits de xmm1
-    paddd xmm0, xmm1        ; soma valores de 32 bits dentro dos registos xmm0 e xmm1
-    
-    ; Pega o resultado final
-    movd edx, xmm0          ; move apenas os primeiros 32 bits de um registo xmm para um registo normal
-    add eax, edx            ; Acumula no total
-    
-    ; Avanca os ponteiros
-    add esi, 16             ;avança 16 posições no array
-    add edi, 16             ;avança 16 posições no array
-    
-    ; Controla o loop
-    dec ebx                 ;quando chegar a 0 é porque já não existem blocos de 16 bytes completos para serem somados
-    jnz LoopPrincipal
+    push esi                  ; Salva o registo de índice da fonte (ESI)
+    push edi                  ; Salva o registo de índice de destino (EDI)
+    push ebx                  ; Salva o registo temporário (EBX)
 
-elementosRestantes:
-    ; Processa elementos que sobraram (<16)
-    cmp ecx, 0              ;verifica se ainda existem valores para somar que não caibam num bloco de 16 bytes
-    je done                 ;se já não existirem avança para o label done para calcular a média
-    
-    xor ebx, ebx            ; Zera o registo ebx
-    xor edx, edx            ; Zera o registo edx
+    ; Carrega os parâmetros da função nos registos:
+    mov esi, [ebp + 8]        ; Carrega o endereço do primeiro array (one) no ESI
+    mov edi, [ebp + 12]       ; Carrega o endereço do segundo array (two) no EDI
+    mov edx, [ebp + 16]       ; Carrega o endereço do array de resultado (result) no EDX
+    mov ecx, [ebp + 20]       ; Carrega o tamanho (length) dos arrays no ECX
 
-loopElementoPorElemento:
-    ; Soma elemento por elemento
-    movzx ebx, byte ptr [esi]  ; Pega byte do arrayOne
-    movzx edx, byte ptr [edi]  ; Pega byte do arrayTwo
-    add ebx, edx               ; Soma os dois
-    add eax, ebx               ; Acumula
-    
-    ; Proximo elemento
-    inc esi                    ; Incrementa para iterar o proximo elemento
-    inc edi                    ; Incrementa para iterar o proximo elemento
-    dec ecx                    ; Decrementa mais um valor dos elementos restantes
-    jnz loopElementoPorElemento
+    xor eax, eax              ; Inicializa o índice i = 0
 
-done:
-    ; Calcula a media final
-    cdq                        ; Expande o valor do registo eax de 32 bits para 64 bits, guardando o sinal em edx (idiv necessita de valores de 64 bits)
-    idiv dword ptr [ebp+16]    ; Divide pelo valor maximo
-    
-    ; Restaura Registos ao seu estado Inicial
-    pop edi                    ; Efetua um pop para deixar a stack como ela estava anteriormente
-    pop esi                    ; Efetua um pop para deixar a stack como ela estava anteriormente
-    pop ebx                    ; Efetua um pop para deixar a stack como ela estava anteriormente
-    mov esp, ebp               ; Restaura o stack pointer (esp) para o valor salvo no início da função (ebp)
-    pop ebp                    ; Efetua um pop para deixar a stack como ela estava anteriormente
-    ret                        ; Sai da função
+.simd_loop:                  ; Laço principal para processar os arrays em blocos de 16 bytes
+    cmp ecx, eax              ; Compara i com o tamanho (size)
+    jl .ElementosRestantes    ; Se i >= size, salta para o processamento dos elementos restantes
+
+    mov ebx, ecx              ; Copia o tamanho para EBX
+    sub ebx, eax              ; Calcula os elementos restantes (size - i)
+    cmp ebx, 16               ; Verifica se há pelo menos 16 elementos restantes
+    jl .ElementosRestantes    ; Se menos de 16, vai para o processamento dos elementos restantes
+
+    ; Processa 16 bytes de cada vez usando SIMD:
+    movdqu xmm0, [esi + eax]  ; Carrega 16 bytes do array one para o xmm0
+    movdqu xmm1, [edi + eax]  ; Carrega 16 bytes do array two para o xmm1
+    pavgb xmm0, xmm1          ; Executa a média SIMD (arredondando para baixo) nos dois arrays
+    movdqu [edx + eax], xmm0  ; Armazena o resultado da média no array de resultado
+
+    add eax, 16               ; Incrementa o índice de 16 (processando 16 bytes de uma vez)
+    jmp .simd_loop            ; Repete o laço
+
+.ElementosRestantes:         ; Laço para processar os bytes restantes (menos de 16)
+    cmp eax, ecx              ; Compara o índice i com o tamanho
+    jge .done                 ; Se i >= size, terminamos
+
+    mov al, [esi + eax]       ; Carrega one[i] (byte do array one) no AL
+    mov bl, [edi + eax]       ; Carrega two[i] (byte do array two) no BL
+
+    ; Calcula a média (arredondando o resultado para o inteiro mais próximo):
+    add ax, bx                ; Soma os valores de one[i] e two[i] (ax = one[i] + two[i])
+    add ax, 1                 ; Adiciona 1 ao resultado para arredondar a média (a + b + 1)
+    shr ax, 1                 ; Divide a soma por 2 (média arredondada)
+
+    mov [edx + eax], al       ; Armazena o resultado (média) no result[i] (usando o byte inferior de AX)
+
+    inc eax                   ; Incrementa o índice
+    jmp .ElementosRestantes   ; Repete o laço para os próximos elementos restantes
+
+.done:                        ; Fim da função
+    pop ebx                   ; Restaura o registo temporário (EBX)
+    pop edi                   ; Restaura o registo de índice de destino (EDI)
+    pop esi                   ; Restaura o registo de índice da fonte (ESI)
+    pop ebp                   ; Restaura o ponteiro base (EBP)
+    ret                       ; Retorna da função
+
 SumTotalASM ENDP
 
 ; Fim do arquivo
