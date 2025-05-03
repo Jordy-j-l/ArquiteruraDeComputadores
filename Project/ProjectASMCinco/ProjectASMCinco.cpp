@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define SIZE 10
-//extern "C" void Sinal(char one[], char two[], char result[], int arraySize);
+extern "C" void Sinal(char one[], char two[], char result[], int arraySize);
 // Função simplificada para comparar magnitudes
 void SinalSimples(char A[], char B[], char R[], int n) {
     for (int i = 0; i < n; i++) {
@@ -44,12 +44,12 @@ int main() {
 
     // Chama a função
     SinalSimples(A, B, ResultadoC, SIZE);
-    //Sinal(A, B, ResultadoASM, SIZE);
+    Sinal(A, B, ResultadoASM, SIZE);
     // Mostra os resultados
     printf("A\tB\tResultadoemC\tResultadoemASM\n");
     printf("-----------------------\n");
     for (int i = 0; i < SIZE; i++) {
-        printf("%d\t%d\t%d\t\n", A[i], B[i], ResultadoC[i]);
+        printf("%d\t%d\t%d\t%d\n", A[i], B[i], ResultadoC[i], ResultadoASM[i]);
     }
 
     return 0;
