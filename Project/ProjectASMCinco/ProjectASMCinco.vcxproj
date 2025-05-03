@@ -130,6 +130,11 @@
   <ItemGroup>
     <ClCompile Include="ProjectASMCinco.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Asembly.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </MASM>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
