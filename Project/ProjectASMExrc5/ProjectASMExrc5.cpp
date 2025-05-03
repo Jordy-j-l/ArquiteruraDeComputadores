@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SIZE 20
+#define SIZE 10
 extern "C" void Sinal(char one[], char two[], char result[], int arraySize);
 // Função simplificada para comparar magnitudes
 void SinalSimples(char A[], char B[], char R[], int n) {
@@ -17,6 +17,11 @@ void SinalSimples(char A[], char B[], char R[], int n) {
         }
         else if (absB > absA) {
             R[i] = B[i] < 0 ? -1 : 1;
+        }
+        else if (absA == absB) {
+            if ((A[i] == -B[i]) || -A[i] == B[i]) {
+                R[i] = 0;
+            }
         }
         else {
             R[i] = 0;
@@ -35,6 +40,7 @@ int main() {
         A[i] = (rand() % 256) - 128;
         B[i] = (rand() % 256) - 128;
     }
+
 
     // Chama a função
     SinalSimples(A, B, ResultadoC, SIZE);
