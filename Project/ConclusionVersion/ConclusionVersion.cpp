@@ -4,9 +4,9 @@
 #include <time.h>
 #include <chrono>
 
-#define size 200
+#define size 10
 
-extern "C" void average_arrays( char one[],  char two[],  char result[], int arraySize);
+extern "C" void average_arrays( char one[],  char two[],  char result[], int arraySize, char Const[]);
 
 void averageC( char one[],  char two[],  char result[], int arraySize) {
     for (int i = 0; i < size; i++) {
@@ -23,7 +23,7 @@ int main() {
      char two[size];
      char resultASM[size];
      char resultC[size];
-
+     char Const[16];
     srand(time(NULL));
 
     // Preenche os arrays com valores aleatórios entre 0 e 255
@@ -35,8 +35,12 @@ int main() {
         two[i] = (rand() % 256)-128;
 
     }
+    for (int i = 0; i < 16; i++) {
+        Const[i] = 128;
+
+    }
     averageC(one, two, resultC, size);
-    average_arrays(one, two, resultASM, size);
+    average_arrays(one, two, resultASM, size,Const);
 
     // Mostrar os resultados de alguns elementos para verificação
     printf("Resultados:\n");

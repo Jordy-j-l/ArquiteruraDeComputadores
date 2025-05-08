@@ -17,10 +17,9 @@ average_arrays PROC
     mov edi, [ebp + 12]       ; arrayTwo
     mov edx, [ebp + 16]       ; arrayResult e array prenchido com constante 128 
     mov ecx, [ebp + 20]       ; arraySize
-    
+    movdqu xmm2, [ebp + 24]  ; array const
     xor eax, eax              ; index i = 0
-    movdqu xmm2, [edx + eax]  ; load 16 bytes from array Result
-
+    
     ; Process elements 16 at a time using SIMD
 SIMDLoop:
     cmp eax, ecx
