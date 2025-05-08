@@ -6,30 +6,33 @@
 
 #define size 200
 
-extern "C" void average_arrays(unsigned char one[], unsigned char two[], unsigned char result[], int arraySize);
+extern "C" void average_arrays( char one[],  char two[],  char result[], int arraySize);
 
-void averageC(unsigned char one[], unsigned char two[], unsigned char result[], int arraySize) {
+void averageC( char one[],  char two[],  char result[], int arraySize) {
     for (int i = 0; i < size; i++) {
+       
         result[i] = (one[i] + two[i] + 1) / 2;  // Média com arredondamento
     }
 }
 
 int main() {
-    // Aloca memória para os arrays
-    unsigned char one[size];
-    unsigned char two[size];
-    unsigned char resultASM[size];
-    unsigned char resultC[size];
+    char teste = 200;
+
+   
+     char one[size];
+     char two[size];
+     char resultASM[size];
+     char resultC[size];
 
     srand(time(NULL));
 
     // Preenche os arrays com valores aleatórios entre 0 e 255
     for (int i = 0; i < size; i++) {
-        one[i] = rand() % 256;
+        one[i] = (rand() % 256)-128;
 
     }
     for (int i = 0; i < size; i++) {
-        two[i] = rand() % 256;
+        two[i] = (rand() % 256)-128;
 
     }
     averageC(one, two, resultC, size);
@@ -55,6 +58,7 @@ int main() {
     printf("\nTempo de execução em C: %.2f microssegundos\n", duracaoC.count());
     printf("Tempo de execução em Assembly: %.2f microssegundos\n", duracaoASM.count());
     */
+
     system("pause");
     return 0;
 }
