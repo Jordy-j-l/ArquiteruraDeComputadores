@@ -4,9 +4,9 @@
 #include <time.h>
 #include <chrono>
 
-#define size 10
+#define size 50
 
-extern "C" void average_arrays( char one[],  char two[],  char result[], int arraySize, char Const[]);
+extern "C" void average_arrays( char one[],  char two[],  char result[], int arraySize);
 
 void averageC( char one[],  char two[],  char result[], int arraySize) {
     for (int i = 0; i < size; i++) {
@@ -40,7 +40,7 @@ int main() {
 
     }
     averageC(one, two, resultC, size);
-    average_arrays(one, two, resultASM, size,Const);
+    average_arrays(one, two, resultASM, size);
 
     // Mostrar os resultados de alguns elementos para verificação
     printf("Resultados:\n");

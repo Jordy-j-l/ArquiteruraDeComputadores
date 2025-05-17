@@ -1,9 +1,6 @@
 .MODEL FLAT, C
-; --- Seção de Dados Constantes ---
-.DATA
-    align 16
-mask128 BYTE 16 DUP(80h)   ; 16 bytes com o valor 0x80 (128 decimal)
-
+.Data
+valores BYTE 128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128
 .CODE
 
 average_arrays PROC
@@ -13,51 +10,54 @@ average_arrays PROC
     push edi
     push ebx
     
+    ; Carrega parâmetros
     mov esi, [ebp + 8]        ; arrayOne
     mov edi, [ebp + 12]       ; arrayTwo
-    mov edx, [ebp + 16]       ; arrayResult e array prenchido com constante 128 
+    mov edx, [ebp + 16]       ; arrayResult
     mov ecx, [ebp + 20]       ; arraySize
-    movdqu xmm2, [ebp + 24]  ; array const
-    xor eax, eax              ; index i = 0
+   movdqa xmm2, XMMWORD PTR [valores] ; carrega os 16 bytes de 128 que estão na memeoria
+    xor eax, eax              ; índice i = 0
     
-    ; Process elements 16 at a time using SIMD
+    ; Processa 16 elementos por vez
 SIMDLoop:
     cmp eax, ecx
-    jge Done
+    jge ProcessRemaining       ; Se i >= size, vai para o processamento escalar
     
-    movdqu xmm0, [esi + eax]  ; load 16 bytes from arrayOne
-    movdqu xmm1, [edi + eax]  ; load 16 bytes from arrayTwo
+    ; Carrega 16 bytes de cada array
+    movdqu xmm0, [esi + eax]  ; XMM0 = arrayOne[i..i+15]
+    movdqu xmm1, [edi + eax]  ; XMM1 = arrayTwo[i..i+15]
     
-    paddb xmm0, xmm2          ; soma 128 aos elementos do arrayUm
-    paddb xmm1, xmm2          ; soma 128 aos elementos do arrayDois
-    pavgb xmm0, xmm1          ; packed average with rounding
-    psubb xmm0, xmm2          ; subtrai 128 do resultado
-    movdqu [edx + eax], xmm0  ; store result
+    ; Converte de signed (-128..127) para unsigned (0..255) somando 128
+    paddb xmm0, xmm2         ; arrayOne[i] +128
+    paddb xmm1, xmm2         ; arrayTwo[i] +128
     
-    add eax, 16
-    cmp eax, ecx
-    jl SIMDLoop
+    ; Calcula média unsigned com arredondamento
+    pavgb xmm0, xmm1          ; XMM0 = (XMM0 + XMM1 + 1) / 2
     
-    ; Process remaining elements one by one
+    ; Converte de volta para signed subtraindo 128
+    psubb xmm0, xmm2         ; XMM0 -= 128 (com saturação signed)
+    
+    ; Armazena o resultado
+    movdqu [edx + eax], xmm0  ; arrayResult[i..i+15] = XMM0
+    
+    add eax, 16               ; Avança 16 bytes
+    jmp SIMDLoop
+
+    ; Processa elementos restantes (1 a 15) um a um
 ProcessRemaining:
     cmp eax, ecx
     jge Done
     
-    ; Carrega bytes (8 bits) e estende para 16 bits (evita overflow)
-    movzx bx, byte ptr [esi + eax]  ; bx = arrayOne[i] (zero-extend)
-    movzx dx, byte ptr [edi + eax]  ; dx = arrayTwo[i] (zero-extend)
+    ; Carrega bytes com extensão de sinal para 16 bits
+    movsx bx, byte ptr [esi + eax]  ; BX = arrayOne[i] (sign-extended)
+    movsx dx, byte ptr [edi + eax]  ; DX = arrayTwo[i] (sign-extended)
     
-    ; Soma 128 a ambos (agora em 16 bits)
-    add bx, 128
-    add dx, 128
+    ; Calcula média com arredondamento: (a + b + 1) / 2
+    add bx, dx                ; BX = arrayOne[i] + arrayTwo[i]
+    inc bx                    ; BX += 1 (para arredondamento)
+    sar bx, 1                 ; BX /= 2 (shift aritmético preserva sinal)
     
-    ; Calcula média: (bx + dx + 1) / 2
-    add bx, dx
-    inc bx
-    shr bx, 1
-    
-    ; Subtrai 128 e armazena o resultado (8 bits)
-    sub bl, 128
+    ; Armazena o resultado (apenas o byte inferior)
     mov [edx + eax], bl
     
     inc eax

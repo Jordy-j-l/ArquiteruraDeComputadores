@@ -29,7 +29,7 @@ SumTotalASM PROC
     mov esi, [ebp+8]        ; arrayOne
     mov edi, [ebp+12]       ; arrayTwo
     mov ecx, [ebp+20]       ; tamanhoDosArrays
-    mov 
+    
     ; Verifica se tem elementos suficientes para processar em blocos
     cmp ecx, 16
     jl elementosRestantes
